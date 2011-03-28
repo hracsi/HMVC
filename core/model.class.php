@@ -64,7 +64,7 @@ class Model extends SQL
     {
         echo '<br />' . $this->makingSelect($this->describe()->execute()->fetchAll(),$this->_table) . '<br />';
         echo $this->makingFrom($this->getConnections())  . '<br />';;
-        echo $this->makingWhere($this->getConnections());
+        echo $this->makingConnections($this->getConnections());
     }
     
 /**
