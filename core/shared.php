@@ -1,6 +1,19 @@
 <?php
 
 /**
+ *
+ * A few useful functions that can be reached globaly.  
+ *
+ * @copyright     Copyright 2010, Hracsi's MVC Project http://hracsi.net
+ * @package       hmvc
+ * @subpackage    hmvc.core.config
+ * @since         hmvc (tm) v. 0.2.1.0
+ * @version       hmvc (tm) v. 0.8.4.0
+ * 
+ */
+
+
+/**
  * Function to set the level of reporting
  * 
  * @param int level of error report
@@ -75,32 +88,3 @@ function redirect($url = null)
 	function upCase($str) {
 		return strtoupper($str);
 	}
-
-/**
- * Function that transoforming a text that you can put to an url
- * 
- * @example $text = 'helló világ oldal' -> $text = 'hello_vilag_oldal'
- * @param string: that should be transformed
- * @return string: that is transformed
- */
-
-function generatePrettyUrl($text){ 
-     $text = mb_strtolower($text, 'UTF-8'); 
-     $text = str_replace('ő', 'o', $text); 
-     $text = str_replace('ű', 'u', $text); 
-     $text = mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8'); 
-     $text = strtr($text, utf8_decode('éáúíöüóõû'), 'eauiouoou'); 
-     $text = preg_replace('/#/', 'sharp', $text); 
-     $text = preg_replace('/%/', ' szazalek', $text); 
-     $text = preg_replace('/\=/', 'egyenlo', $text); 
-     $text = preg_replace('/\si\.?\s*$/', ' 1', $text); 
-     $text = preg_replace('/\sii\.?\s*$/', ' 2', $text); 
-     $text = preg_replace('/\siii\.?\s*$/', ' 3', $text); 
-     $text = preg_replace('/(?![a-z0-9\s])./', '', $text); 
-     $text = preg_replace('/\s\s+/', ' ', $text); 
-     $text = preg_replace('/^\s|\s$/', '', $text); 
-     $text = preg_replace('/\s/', '-', $text); 
-      
-     return $text; 
-}
-

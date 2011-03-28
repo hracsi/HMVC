@@ -3,13 +3,13 @@
 /**
  * HTML
  * 
- * Helper for html operations
+ * Helper for html operations.
  * 
  * @copyright     Copyright 2010, Hracsi's MVC Project http://hracsi.net
  * @package       hmvc
  * @subpackage    hmvc.core.view.helpers.html
  * @since         hmvc (tm) v. 0.1.0.0
- * @version       hmvc (tm) v. 0.7.9.8 beta
+ * @version       hmvc (tm) v. 0.8.4.1
  * 
  */
 
@@ -87,7 +87,7 @@ class HTML
             //putting together the url ex.: /post/view/1/test-link
             if ( is_array($components) ) {
         		foreach($components as $name => $value){
-       				$url = $url . generatePrettyUrl($value) . '/';
+       				$url = $url . self::generatePrettyUrl($value) . '/';
         		}
         		$url = substr($url, 0, strlen($url)-1);
             } else {
@@ -163,6 +163,35 @@ class HTML
     	curl_close($ch); 
     	return '<a href="'.$data.'" target = "_blank" >'.$data.'</a>'; 
     }
+
+    /**
+     * Transforming a text that you can put to an url
+     * 
+     * @example $text ex.: 'helló világ oldal' -> $text = 'hello_vilag_oldal'
+     * @param string $text That should be transformed.
+     * @return string That is transformed.
+     */
+    
+    private function generatePrettyUrl($text){ 
+         $text = mb_strtolower($text, 'UTF-8'); 
+         $text = str_replace('ő', 'o', $text); 
+         $text = str_replace('ű', 'u', $text); 
+         $text = mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8'); 
+         $text = strtr($text, utf8_decode('éáúíöüóõû'), 'eauiouoou'); 
+         $text = preg_replace('/#/', 'sharp', $text); 
+         $text = preg_replace('/%/', ' szazalek', $text); 
+         $text = preg_replace('/\=/', 'egyenlo', $text); 
+         $text = preg_replace('/\si\.?\s*$/', ' 1', $text); 
+         $text = preg_replace('/\sii\.?\s*$/', ' 2', $text); 
+         $text = preg_replace('/\siii\.?\s*$/', ' 3', $text); 
+         $text = preg_replace('/(?![a-z0-9\s])./', '', $text); 
+         $text = preg_replace('/\s\s+/', ' ', $text); 
+         $text = preg_replace('/^\s|\s$/', '', $text); 
+         $text = preg_replace('/\s/', '-', $text); 
+          
+         return $text; 
+    }
+    
 
 
 }

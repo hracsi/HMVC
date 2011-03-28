@@ -1,16 +1,22 @@
 <?php
 
 /**
- * Calling the classes and the methods
+ * Starting the MVC.
  *  
- * callHooker()
- * 
  * @copyright     Copyright 2010, Hracsi's MVC Project http://hracsi.net
  * @package       hmvc
  * @subpackage    hmvc.core
  * @since         hmvc (tm) v. 0.5.6.0
- * @version       hmvc (tm) v. 0.7.5.6
+ * @version       hmvc (tm) v. 0.8.4.0
  * 
+ */
+ 
+/**
+ * callHooker()
+ * 
+ * Calling the classes and the methods.
+ * 
+ * @return void
  */
  
 function callHooker()
@@ -19,7 +25,7 @@ function callHooker()
     
     //celaring all variables in the $_POST and $_GET avoiding sql or html code injection
     $_POST = clearArray($_POST);
-    $_GET = clearArray($_GET);
+    $_GET  = clearArray($_GET);
     
     $parameters = array();
 	if ( !isset($url) ) {
@@ -42,7 +48,7 @@ function callHooker()
 	
     $controllerName = ucfirst($controller) . 'Controller';
     $mainController = $controller;
-    
+
     /** If the class doesn't exist call the default controller and action **/
     if ( !class_exists($controllerName) ) {
         /** MAKE A LOG HERE **/
@@ -110,21 +116,37 @@ function __autoload($className){
         global $numOfClasses,$classes;
         $numOfClasses++;
         $classes = $classes . ' - ' . $className;
+
         $className = strtolower($className);
-    	if ( file_exists(CORE_LIB . $className . '.class.php') ) {
-    		include_once(CORE_LIB . $className . '.class.php');
+        if ( file_exists(CORE_LIB . $className . '.php') ) {
+    		include_once(CORE_LIB . $className . '.php');
+            return true;
     	}
-    	elseif ( file_exists(CONTROLLERS_LIB . $className . '.class.php') ) {
-    		include_once(CONTROLLERS_LIB . $className . '.class.php' );
+    	elseif ( file_exists(CONTROLLERS_LIB . $className . '.php') ) {
+    		include_once(CONTROLLERS_LIB . $className . '.php' );
+            return true;
     	}
     	elseif ( file_exists(MODELS_LIB . $className . '.php') ) {
     		include_once (MODELS_LIB . $className . '.php');
+            return true;
     	}
-    	else {
+        elseif ( file_exists(VIEWS_LIB . $className . '.php') ) {
+    	   include_once (VIEWS_LIB . $className . '.php');
+           return true;
+    	}
+        elseif ( file_exists(APP_CONTROLLERS_LIB . $className . '.php') ) {
+    	   include_once(APP_CONTROLLERS_LIB . $className . '.php');
+           return true;
+    	}
+        elseif ( file_exists(APP_MODELS_LIB . $className . '.php') ) {
+    	   include_once(APP_MODELS_LIB . $className . '.php');
+           return true;
+    	}
+        else {
     		/** MAKE A LOG HERE **/
+            return false;
     	}
 }
 
-$inflect = new Inflector;
 setErrorReporting();
 callHooker();

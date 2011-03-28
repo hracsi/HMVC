@@ -1,19 +1,31 @@
 <?php
 
+/**
+ *
+ * Confiugration of the current system.  
+ *
+ * @copyright     Copyright 2010, Hracsi's MVC Project http://hracsi.net
+ * @package       hmvc
+ * @subpackage    hmvc.core.config
+ * @since         hmvc (tm) v. 0.5.6.1
+ * @version       hmvc (tm) v. 0.8.4.0
+ * 
+ */
+
 define(SQL_ENGINE,'mysql');
-define(HOST,'127.0.0.1');
-define(DB_USER,'root');
-define(DB_PASSWORD,'b050108944');
-define(DB_NAME,'blog');
+define(HOST,'');
+define(DB_USER,'');
+define(DB_PASSWORD,'');
+define(DB_NAME,'');
 
 
 define(DEBUG_MODE,2);
 
 define(CHARSET,'UTF8');
-define(START_TITLE,'.: My Blog');
-define(END_TITLE,':.');
+define(START_TITLE,'');
+define(END_TITLE,'');
 
-define(ADMIN_PASSWORD,'sirius');
+define(ADMIN_PASSWORD,'');
 
-$default['controller'] = 'Posts';
-$default['action'] = 'index';
+$default['controller'] = '';
+$default['action'] = '';

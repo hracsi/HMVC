@@ -8,7 +8,7 @@
  * @package       hmvc
  * @subpackage    hmvc.core.view.template
  * @since         hmvc (tm) v. 0.5.6.0
- * @version       hmvc (tm) v. 0.7.5.6
+ * @version       hmvc (tm) v. 0.8.4.1
  * 
  */
  
@@ -28,28 +28,27 @@ class Template extends View
         
         //rendering the header
         global $mainController;
+        $mainController = lowCase($mainController);
+
         //if there is a special header for the class
-        if (  file_exists(VIEWS_LIB_LIB . $mainController . '/header.php') ) {
-            include_once(VIEWS_LIB_LIB . $mainController . '/header.php');
+        if (  file_exists(APP_VIEWS_LIB . $mainController . '/header.php') ) {
+            include_once(APP_VIEWS_LIB . $mainController . '/header.php');
         } else {
-            include_once(VIEWS_LIB_LIB . 'header.php');
+            include_once(APP_VIEWS_LIB . 'header.php');
         }
         
         //rendering all the templates
         foreach($templates as $arrays){
             foreach($arrays as $controller => $action){
-
-                $controller = strToLower($controller);
-                $action     = strToLower($action);
-                //echo '<br />c: ' . $controller . ' ---- m: ' . $action;
-                if (  file_exists(VIEWS_LIB_LIB . $controller . '/' . $action . '.php') ) {
-                    include_once(VIEWS_LIB_LIB . $controller . '/' . $action . '.php');
+                $controller = lowCase($controller);
+                $action     = lowCase($action);
+                if (  file_exists(APP_VIEWS_LIB . $controller . DS . $action . '.php') ) {
+                    include_once(APP_VIEWS_LIB . $controller . DS . $action . '.php');
                 }
-
             }
         }
         
         //rendering the footer
-        include_once(VIEWS_LIB_LIB . 'footer.php');
+        include_once(APP_VIEWS_LIB . 'footer.php');
     }
 }

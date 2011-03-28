@@ -1,17 +1,19 @@
 <?php
 
 /**
- * SQL
+ * Sql
+ * 
+ * Handling the SQL operations.
  * 
  * @copyright     Copyright 2010, Hracsi's MVC Project http://hracsi.net
  * @package       hmvc
  * @subpackage    hmvc.core.model.sql
  * @since         hmvc (tm) v. 0.1.0.0
- * @version       hmvc (tm) v. 0.7.9.8 beta
+ * @version       hmvc (tm) v. 0.8.4.1
  * 
  */
  
-class SQL
+class Sql
 {
 	protected 
 		$_dsn,
@@ -20,12 +22,11 @@ class SQL
         $_charset,
 		$_dbh = null,
 
-		$_connected,
-        $_table,
-		$_query,
-		$_result,
+		$_connected,   /** bool If the source is connected. **/
+        $_table,       /** string The name of the table. **/
+		$_query,       /** string The SQL Statement. **/
+		$_result,      /** Object_item The result as the object's resource. '**/
 		$_limit;
-	
 
 /**
  * Constructor
@@ -49,11 +50,11 @@ class SQL
 /**
  * SQL::connect()
  * 
- * @param string $dsn the dsn link for sql connection
- * @param string $user sql user
- * @param string $password sql password
- * @param string $charset the default charset
- * @return boolean True if the database is connected, else false
+ * @param string $dsn The dsn link for sql connection.
+ * @param string $user SQL user.
+ * @param string $password SQL password.
+ * @param string $charset The default charset.
+ * @return boolean True if the database is connected, else false.
  */
      
     public function connect($dsn = null , $user = null, $password = null, $charset = null)
@@ -74,7 +75,7 @@ class SQL
           
             $this->_dbh = new PDO($dsn, $user, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '" . $charset . "'"));
       		$error = $this->_dbh->errorInfo();
-            /** ERROR LOGGING/CATACHING CODE HERE **/
+            /** ERROR LOGGING/ERROR CATCHING CODE HERE **/
     		if ( $error[0] != 00000 ) {
     		  echo '<p>DATABASE CONNECTION ERROR:</p>';
     		  print_r($error);
@@ -229,11 +230,11 @@ class SQL
 		}
 		
 		if ( substr_count(strtoupper($this->_query),'SELECT') > 0 ) {
-            echo '<br /><i>A jelnlegi SQL query: ' . $this->_query . '</i><br />';
-			$this->_result = $this->_dbh->query($this->_query) or die ('cumi111' . print_r($this->_dbh->errorInfo()));
+            //echo '<br /><i>A jelnlegi SQL query: ' . $this->_query . '</i><br />';
+			$this->_result = $this->_dbh->query($this->_query) or die ('error1' . print_r($this->_dbh->errorInfo()));
 		} else {
 			//echo 'q: ' . $this->_query;
-            $this->_result = $this->_dbh->query($this->_query, PDO::FETCH_ASSOC) or die ('cumi222' . print_r($this->_dbh->errorInfo()));
+            $this->_result = $this->_dbh->query($this->_query, PDO::FETCH_ASSOC) or die ('error2' . print_r($this->_dbh->errorInfo()));
 		}
         //counting queries
         global $numberOfQueries;
@@ -259,7 +260,16 @@ class SQL
 	{
 		return $this->_result->fetch(PDO::FETCH_ASSOC);
 	}
-    
+
+/**
+ * SQL::describe()
+ * 
+ * Changing the query to DESCRIBE `table`.
+ * 
+ * @param string $table The name of the SQL table.
+ * @return Object $this.
+ */
+
     public function describe($table = '')
     {
         if( $table == '' ) {

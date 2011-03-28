@@ -1,14 +1,15 @@
 <?php
     
 /**
- * Handeling all the controllers and importing them
- *  
-  * 
+ * Controller
+ * 
+ * Handeling all the controllers and importing them.
+ * 
  * @copyright     Copyright 2010, Hracsi's MVC Project http://hracsi.net
  * @package       hmvc
  * @subpackage    hmvc.core.controller
  * @since         hmvc (tm) v. 0.1.0.0
- * @version       hmvc (tm) v. 0.7.5.6
+ * @version       hmvc (tm) v. 0.8.4.1
  * 
  */
 
@@ -44,7 +45,6 @@ class Controller
 
         //if there is an action put the controller and the action to the template list
         if ( $action ) {
-            //echo 'here i\'m this is me: ' . $controller . ' ------- ac: ' . $action . '<br />';
             $this->_view->addToTemplates($controller, $action);
         }
         

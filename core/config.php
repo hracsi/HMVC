@@ -2,13 +2,13 @@
 
 /**
  *
- * defining the libaries and do some configuration  
+ * Defining the libaries and do some configuration.  
  *
  * @copyright     Copyright 2010, Hracsi's MVC Project http://hracsi.net
  * @package       hmvc
  * @subpackage    hmvc.core.config
  * @since         hmvc (tm) v. 0.5.6.1
- * @version       hmvc (tm) v. 0.5.5.6
+ * @version       hmvc (tm) v. 0.8.4.0
  * 
  */
 
@@ -22,13 +22,19 @@ define('CONFIG_LIB',ROOT . DS . 'config' . DS);
 
 define('CORE_LIB',ROOT . DS . 'core' . DS);
 
+define('CONTROLLERS_LIB',CORE_LIB . 'controller' . DS);
+
+define('MODELS_LIB',CORE_LIB . 'model' . DS);
+
+define('VIEWS_LIB',CORE_LIB . 'view' . DS);
+
 define('APPLICATION_LIB',ROOT . DS . 'app' . DS);
 
-define('CONTROLLERS_LIB',APPLICATION_LIB . 'controllers' . DS);
+define('APP_CONTROLLERS_LIB',APPLICATION_LIB . 'controllers' . DS);
 
-define('MODELS_LIB',APPLICATION_LIB . 'models' . DS);
+define('APP_MODELS_LIB',APPLICATION_LIB . 'models' . DS);
 
-define('VIEWS_LIB_LIB',APPLICATION_LIB . 'views' . DS);
+define('APP_VIEWS_LIB',APPLICATION_LIB . 'views' . DS);
 
 define('PUBLIC_LIB',ROOT . DS . 'public' . DS);
 
@@ -49,5 +55,6 @@ define('LOG_LIB',TMP_LIB . DS . 'logs' . DS);
 define('SESSIONS_LIB',TMP_LIB . DS . 'sessions' . DS);
 
 session_save_path(SESSIONS_LIB);
+
 
 ?>

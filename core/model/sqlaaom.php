@@ -1,7 +1,9 @@
 <?php
 
 /**
- * Giving the required paramaters to the SQL engine
+ * SqlAaom
+ * 
+ * SQL's Advanced Automatic Operations Manager
  *  
  * 
  * @copyright     Copyright 2010, Hracsi's MVC Project http://hracsi.net
@@ -12,70 +14,63 @@
  * 
  */
  
-class Model extends SQL
+class SqlAaom extends Sql
 {
-	public $connectorTable = false;
+    public $connectorTable = false;
     public $connections = array();
-    protected $_model;
     private $data,$fields,$key;
-	
+
 	public function __construct($model = null)
 	{
 		$this->connect();
-        $this->_model = Inflector::makeModelName(get_class($this));
-		$this->_table = Inflector::makeSqlTableName($this->_model);
         $this->data   = '';
         $this->fields = array();
         $this->key    = '';
 	}
-    
+
+/**
+ * SqlAaom::getConnections()
+ *  
+ * @return array the connections that are set in the Models
+ */
     public function getConnections()
     {
         return $this->connections;
     }
-    
-    public function read()
+
+/**
+ * SqlAaom::describeTable()
+ * 
+ * @param string $table The name of the SQL table.
+ * @return array All the information about the table that the DESCRIBE `table` can give.
+ */
+    public function describeTable($table = '')
     {
-        // feldolgozó tömb ami tartalmazza a megfelelő elemeket $this->data ;
-        $this->data = $this->describe();
-        $this->key = '';
-        
-        foreach($this->data as $fields) {
-            foreach($fields as $property => $value){
-                $property = lowCase($property);
-                if ( $property == 'field' ) {
-                    $this->fields = array_push($this->fields, $value);
-                    if ( lowCase($value) == 'id' ) {
-                        $this->key = $value;
-                    } else {
-                        $name = $value;
-                    }
-                } elseif ( $property == 'type' ) {
-                    $type = 'text';
-                } elseif ( !$this->key and $property == 'key' ) {
-                    $this->key = $fields['Field'];
-                }
-            }
-        }
-        $query = 'SELECT ' . $fields . 'FROM ' . $this->_table . ' WHERE ' . $condition . ' ' . $join . $groupBy . $orderBy . $having;
+        return $this->describe($table)->execute()->fetchAll(); 
     }
     
-    public function test()
+    public function findByVirtual($args)
     {
-        echo '<br />' . $this->makingSelect($this->describe()->execute()->fetchAll(),$this->_table) . '<br />';
-        echo $this->makingFrom($this->getConnections())  . '<br />';;
-        echo $this->makingConnections($this->getConnections());
+        $what = $args[0];
+        $equals = $args[1];
+        if ( lowCase($what) == 'all' ) {
+            $what = '';
+            $equals = '';
+        }
+        $select = self::makingSelect(self::describeTable(),$this->table);
+        $from = self::makingFrom(self::getConnections());
+        $where = self::maekingWhere($what,$equals);
     }
     
 /**
- * Model::makingSelect()
+ * SqlAaom::makingSelect()
  * 
- * @param array $describe
- * @param string $table
- * @param bool $distinct
- * @return string list of fields in the table
+ * @param array $describe An array that desicribes the structure of the table.
+ * @param string $table The name of the table.
+ * @param bool $distinct The type of the Selection.
+ * @return string List of fields in the table.
+ * 
  */
-     
     private function makingSelect($describe, $table, $distinct = true)
     {
         if ( $distinct ) {
@@ -100,12 +95,11 @@ class Model extends SQL
     }
     
 /**
- * Model::makingFrom()
+ * SqlAaom::makingFrom()
  * 
  * @param array $array the $connections of the tables
  * @return srtring ex.: 'FROM users, posts ...'
  */
- 
     private function makingFrom($array)
     {
         $tables = array();
@@ -139,13 +133,19 @@ class Model extends SQL
         return 'FROM ' . substr($from,0,strlen($from)-2);
     }
     
+    public function makingWhere($conditions = null){
+        if ( $conditions ) {
+            
+        }
+        return ;
+    }
+    
 /**
- * Model::makingWhere()
+ * SqlAaom::makingWhere()
  * 
  * @param array $array the $connections of the tables
  * @return string the extra conditions for WHERE
  */
- 
     private function makingConnections($array)
     {
         $tables = array();
@@ -188,16 +188,25 @@ class Model extends SQL
     private function makingConnection($array)
     {
         /*
+        SELECT DISTINCT 
+            posts.id, posts.title, posts.text, posts.date, posts.cat_id, posts.user_id
+        FROM 
+            posts, categories, tag_connections, users, user_groups
+        WHERE 
+            posts.cat_id = categories.id 
+        AND posts.id = tag_connections.post_id
+        AND posts.user_id = users.id
+        AND users.user_group_id = user_groups.id
+        
         SELECT 
             posts.id, posts.title, posts.text, posts.date, posts.cat_id, posts.user_id, categories.name AS CategoryName, tags.name AS TagName, users.name as UserName, user_groups.name as UserGroupName
         FROM 
-            posts, categories, tag_connections, tags, users, user_groups
+            posts, categories, tag_connections, users, user_groups
         WHERE 
             posts.cat_id = categories.id
         AND posts.user_id = users.id
         AND users.user_group_id = user_groups.id
         AND tag_connections.post_id = posts.id
-        AND tag_connections.tag_id = tags.id;
         
         Post:
         $connectorTable = false;
@@ -290,13 +299,12 @@ class Model extends SQL
     }
     
 /**
- * Model::renderSqlStatement()
+ * SqlAaom::renderSqlStatement()
  * 
  * @param string the type of the SQL statement
  * @param array all variables that needed to build the SQL statement
  * @return string SQL statement
  */
-     
     public function renderSqlStatement($type, $data)
     {
         extract($data,EXTR_OVERWRITE);
@@ -318,30 +326,29 @@ class Model extends SQL
     }
     
 /**
- * Model::getTableNameFromData()
+ * SqlAaom::getTableNameFromData()
  * 
  * Getting the name of the table from this: table.field
  * 
  * @param string the table.field
  * @return string table
  */
-     
     public function getTableNameFromData($str)
     {
         return strtolower(substr($str, 0, strpos($str, '.')));
     }
     
 /**
- * Model::getFieldNameFromData()
+ * SqlAaom::getFieldNameFromData()
  * 
  * Getting the name of the field from: table.field
  * 
  * @param string the table.field
  * @return string field
  */
-     
     public function getFieldNameFromData($str)
     {
         return strtolower(substr($str,strpos($str, '.')+1));
     }
+    
 }

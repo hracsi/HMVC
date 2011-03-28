@@ -7,7 +7,7 @@
  * 
  * @copyright     Copyright 2010, Hracsi's MVC Project http://hracsi.net
  * @package       hmvc
- * @subpackage    hmvc.core
+ * @subpackage    hmvc.core.view
  * @since         hmvc (tm) v. 0.2.0.0
  * @version       hmvc (tm) v. 0.6.5.6
  * 
