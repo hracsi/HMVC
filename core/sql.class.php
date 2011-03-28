@@ -272,7 +272,7 @@ class SQL
     
     public function __destruct()
     {
-        echo "<br />Vége a dalnak!" . $this->_query ."<br />";
+        //echo "<br />Vége a dalnak!" . $this->_query ."<br />";
     }
 
 }

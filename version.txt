@@ -1,1 +1,1 @@
-HMVC v. 0.7.9.8 beta
+HMVC v. 0.8.3.0 beta 

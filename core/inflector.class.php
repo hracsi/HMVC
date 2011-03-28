@@ -381,8 +381,7 @@ class Inflector {
     
     public function makeModelName($str)
     {
-    	return self::camelize(self::singularize(self::escape($str)));
+    	return self::camelize(self::singularize(self::antiScore(self::escape($str))));
     }
-    
 
 }
