@@ -27,6 +27,34 @@ class Model extends SqlAaom
         $this->key    = '';
 	}
     
+    public function __call($func, $args)
+    {
+        if ( lowCase(substr($func, 0 ,6)) == 'findby' ) {
+            self::findByVirtual(lowCase(substr($func,6)),$args[0]);
+        } elseif ( lowCase(substr($func,0,7)) == 'findall' ) {
+            self::findByVirtual('all');
+        } else {
+            /**
+             * @todo Error logging here.  
+            **/
+        }
+    }
+
+    public function findByVirtual($field, $value = null)
+    {
+        if ( $field != 'all' ) {
+            //condition making
+            echo 'Feltetel: ' . $field . ' = ' . $value;
+        } else {
+            //no condition
+            echo 'nincs feltetel';
+        }
+
+        $select = self::makingFieldsList(self::describeTable(),$this->table);
+        $from = self::makingFrom(self::getConnections());
+        $where = self::maekingWhere($field,$value);
+    }
+    
     /**
      * @todo PUT IT TO CRUD GENERATIONG CLASS 
     **/
@@ -61,9 +89,9 @@ class Model extends SqlAaom
     **/
     public function test()
     {
-        echo '<br />' . $this->makingSelect($this->describe()->execute()->fetchAll(),$this->_table) . '<br />';
-        echo $this->makingFrom($this->getConnections())  . '<br />';;
-        echo $this->makingConnections($this->getConnections());
+        echo '<br />SELECT ' . $this->makingFieldsList($this->describeTable(),$this->_table) . '<br />';
+        echo 'FROM ' . $this->makingFrom($this->getConnections())  . '<br />';;
+        echo 'WHERE ' . $this->makingWhere(array('id' => 6));
     }
 
 }

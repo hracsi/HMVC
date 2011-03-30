@@ -19,6 +19,7 @@ class SqlAaom extends Sql
     public $connectorTable = false;
     public $connections = array();
     private $data,$fields,$key;
+    protected $type,$select,$distinct,$from,$where,$orderBy,$groupBy,$having,$limit;
 
 	public function __construct($model = null)
 	{
@@ -49,33 +50,28 @@ class SqlAaom extends Sql
         return $this->describe($table)->execute()->fetchAll(); 
     }
     
-    public function findByVirtual($args)
-    {
-        $what = $args[0];
-        $equals = $args[1];
-        if ( lowCase($what) == 'all' ) {
-            $what = '';
-            $equals = '';
-        }
-        $select = self::makingSelect(self::describeTable(),$this->table);
-        $from = self::makingFrom(self::getConnections());
-        $where = self::maekingWhere($what,$equals);
-    }
     
 /**
- * SqlAaom::makingSelect()
+ * SqlAaom::makingFieldsList()
  * 
  * @param array $describe An array that desicribes the structure of the table.
  * @param string $table The name of the table.
- * @param bool $distinct The type of the Selection.
  * @return string List of fields in the table.
  * 
  */
-    private function makingSelect($describe, $table, $distinct = true)
+    protected function makingFieldsList($describe = '', $table = '')
     {
-        if ( $distinct ) {
-            $dist = 'DISTINCT '; 
+        if ( !$describe ) {
+            if ( $table ) {
+                $describe = self::describeTable($table);
+            } else {
+                $describe = self::describeTable();
+            }
         }
+        if ( !$table ) {
+            $table = $this->_table;
+        }
+
         $tableFields = array();
         foreach($describe as $fields) {
             foreach($fields as $property => $value){
@@ -91,16 +87,18 @@ class SqlAaom extends Sql
             $select.= $tableField . ', ';
         }
         
-        return 'SELECT ' . $dist . substr($select,0,strlen($select)-2);
+        return substr($select,0,strlen($select)-2);
     }
     
 /**
  * SqlAaom::makingFrom()
  * 
- * @param array $array the $connections of the tables
- * @return srtring ex.: 'FROM users, posts ...'
+ * Making the list of the names of tables for FROM.
+ * 
+ * @param array $array The $connections of the tables.
+ * @return srtring List of tables separted by comma.
  */
-    private function makingFrom($array)
+    protected function makingFrom($array)
     {
         $tables = array();
         foreach($array as $key => $value){
@@ -130,23 +128,41 @@ class SqlAaom extends Sql
         foreach($tables as $table){
             $from .= $table . ', ';
         }
-        return 'FROM ' . substr($from,0,strlen($from)-2);
-    }
-    
-    public function makingWhere($conditions = null){
-        if ( $conditions ) {
-            
-        }
-        return ;
+        return substr($from,0,strlen($from)-2);
     }
     
 /**
  * SqlAaom::makingWhere()
  * 
- * @param array $array the $connections of the tables
- * @return string the extra conditions for WHERE
+ * Putting together extra conditions if they exist and connection tables.
+ * 
+ * @param array $conditions The extra conditions for the selection.
+ * @return string The final WHERE part.
+ * 
  */
-    private function makingConnections($array)
+    public function makingWhere($conditions = null){
+        if ( is_array($conditions) ) {
+            foreach($conditions as $field => $value){
+                $c.= $this->_table . '.' . $field . ' = ' . $value . ' AND ';
+            }
+            $c = substr($c,0,strlen($c)-5);
+        }
+        if ( self::makingConnections($this->getConnections()) ){
+            if ( $c ) {
+                $c.= ' AND ';
+            }
+            $c.= self::makingConnections($this->getConnections());
+        }
+        return $c;
+    }
+    
+/**
+ * SqlAaom::makingConnections()
+ * 
+ * @param array $array The $connections of the tables.
+ * @return string The extra conditions for WHERE.
+ */
+    protected function makingConnections($array)
     {
         $tables = array();
         foreach($array as $key => $value){
@@ -185,117 +201,24 @@ class SqlAaom extends Sql
         return substr($where,0,strlen($where)-5);    
     }
     
-    private function makingConnection($array)
-    {
-        /*
-        SELECT DISTINCT 
-            posts.id, posts.title, posts.text, posts.date, posts.cat_id, posts.user_id
-        FROM 
-            posts, categories, tag_connections, users, user_groups
-        WHERE 
-            posts.cat_id = categories.id 
-        AND posts.id = tag_connections.post_id
-        AND posts.user_id = users.id
-        AND users.user_group_id = user_groups.id
-        
-        SELECT 
-            posts.id, posts.title, posts.text, posts.date, posts.cat_id, posts.user_id, categories.name AS CategoryName, tags.name AS TagName, users.name as UserName, user_groups.name as UserGroupName
-        FROM 
-            posts, categories, tag_connections, users, user_groups
-        WHERE 
-            posts.cat_id = categories.id
-        AND posts.user_id = users.id
-        AND users.user_group_id = user_groups.id
-        AND tag_connections.post_id = posts.id
-        
-        Post:
-        $connectorTable = false;
-        $connections = array('posts.cat_id' => 'categories.id','posts.id' => 'tag_connections.post_id', 'posts.user_id' => 'users.id');
-        
-        TagConnect:
-        $connectorTable = true;
-        $connectedTables = array('Posts' => 'Tags');
-        $connections = array();
-        
-        Tags:
-        $connectorTable = false;
-        $connections = array('tags.id' => 'tag_connections.tag_id');
-        
-        User:
-        $connectorTable = false;
-        $connections = array('user.user_group_id' => 'user_groups.id');
-        
-        SELECT 
-            posts.id, posts.title, posts.text, posts.date, posts.cat_id, posts.user_id, 
-        FROM
-            posts, categories, tag_connections, users, 
-        WHERE
-            posts.cat_id = categories.id
-        AND posts.user_id = users.id
-        AND user.user_group_id = user_groups.id
-        AND posts.id = tag_connections.post_id
-        
-        */
-        $condition = '';
-        foreach($array as $key => $value){
-            $condition.= $key . ' = ' . $value . ' AND ';
-        }
-        echo strlen($condition)-4;
-        $condition = substr($condition,0,strlen($condition)-4);
-        
-        
-    }
-    
-    public function queryMaker($type, $fields, $conditions, $connections, $orderBy, $groupBy, $orderBy, $having)
+    public function queryMaker($type, $conditions, $orderBy, $groupBy, $having, $limit)
     {
         //TYPE
         $type = upCase($type);
         if ( $type == 'SELECT' ) {
-            //FIELDS
-            $fs = '';
-            foreach($fields as $field){
-                $fs = $fs . $field . ',';
+            $fields = self::makingFieldsList(self::describeTable(),$this->table);
+            $table   = self::makingFrom(self::getConnections());
+            if ( self::makingWhere($field,$value) ) {
+                $where = ' WHERE ' . self::makingWhere($conditions);
+            } else {
+                $where = '';
             }
-            $fs = substr($fs, 0, -1); //removing the last comma of the of the sring
-            
-            //INNER JOIN - CONNECT TABLES
-            $con = '';
-            if ( $connections ) {
-                foreach($connections as $connector => $connect){
-                    $con = 'INNER JOIN ' . getTableNameFromData($connector) . ' ON ' . $connector . ' = ' . $connect . ' ';
-                    
-                }
-            }
-            
-            /*
-			if ($fields == null) {
-				unset($fields, $values);
-				$fields = array_keys($model->data);
-				$values = array_values($model->data);
-			}
-            
-            foreach($categories as $category){
-                if ( in_array($category['id'],$leaves) ){
-                    $plus = $plus . "cat_id = '" . $category['id'] . "' OR ";
-                }
-            }
-            $plus = substr($plus,0,strlen($plus)-4);
-            */
-            //WHERE - CONDITION
-            $cond = '';
-            if ( $conditions ) {
-                if ( $connections ) {
-                    $having = 1;
-                }
-                foreach($conditions as $condition){
-                    $con = $con . '';
-                }
-            }
-            
+            $data = compact('fields','table','where');      
         } elseif ( $type = 'UPDATE') {
             
         }
-        
+        $this->_query = self::renderSqlStatement($type, $data);
+        return $this;
     }
     
 /**
@@ -311,17 +234,24 @@ class SqlAaom extends Sql
         $type = upCase($type);
         switch ($type){ 
             case 'SELECT':
-                return 'SELECT ' . $fields . ' FROM ' . $table . $joins . $conditions . $group . $order . $limit;
+                if ( $this->distinct ) {
+                    $distinct = 'DISTINCT ';
+                }
+                return 'SELECT ' . $distinct . $fields . ' FROM ' . $table . $where . $groupBy . $orderBy . $having . $limit;
             break;
             case 'INSERT':
                 return 'INSERT INTO ' . $table . ' ' . $fields . ' VALUES (' . $values . ')'; 
             break;
             case 'UPDATE':
-                return 'UPDAE ' . $table . ' SET ' . $fields . $conditions;
+                return 'UPDAE ' . $table . ' SET ' . $values . $where;
             break;
             case 'DELETE':
-                return '';
+                return 'DELETE FROM ' . $table . $where;
             break;
+            default:
+                /**
+                 * @todo Error logging here.
+                **/
         }
     }
     
