@@ -117,7 +117,7 @@ function __autoload($className){
         $numOfClasses++;
         $classes = $classes . ' - ' . $className;
 
-        $className = strtolower($className);
+        $className = lowCase($className);
         if ( file_exists(CORE_LIB . $className . '.php') ) {
     		include_once(CORE_LIB . $className . '.php');
             return true;

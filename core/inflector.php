@@ -199,7 +199,7 @@ class Inflector {
 		static $instance = array();
 
 		if (!$instance) {
-			$instance[0] =& new Inflector();
+			$instance[0] = new Inflector();
 		}
 		return $instance[0];
 	}

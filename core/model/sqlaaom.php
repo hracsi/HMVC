@@ -50,6 +50,27 @@ class SqlAaom extends Sql
         return $this->describe($table)->execute()->fetchAll(); 
     }
     
+    public function getTablePrimaryKeyName($describe = '', $table = '')
+    {
+        if ( !$table ) {
+            $table = $this->_table;
+        }
+        if ( !$describe ) {
+            $describe = self::describeTable($table);
+        }
+        
+        foreach($describe as $fields) {
+            foreach($fields as $property => $value){
+                if ( lowCase($property) == 'field' ) {
+                    $fieldName = $value;
+                }
+                if ( lowCase($property) == 'key' and lowCase($value) == 'pri' ) {
+                    return $fieldName;
+                }
+            }
+        }
+    }
+    
     
 /**
  * SqlAaom::makingFieldsList()
@@ -59,24 +80,19 @@ class SqlAaom extends Sql
  * @return string List of fields in the table.
  * 
  */
-    protected function makingFieldsList($describe = '', $table = '')
+    protected function makingFieldsList($describe = null, $table = null)
     {
-        if ( !$describe ) {
-            if ( $table ) {
-                $describe = self::describeTable($table);
-            } else {
-                $describe = self::describeTable();
-            }
-        }
         if ( !$table ) {
             $table = $this->_table;
+        }
+        if ( !$describe ) {
+            $describe = self::describeTable($table);
         }
 
         $tableFields = array();
         foreach($describe as $fields) {
             foreach($fields as $property => $value){
-                $property = lowCase($property);
-                if ( $property == 'field' ) {
+                if ( lowCase($property) == 'field' ) {
                     array_push($tableFields, $table . '.' . $value);
                 }
             }
@@ -98,8 +114,11 @@ class SqlAaom extends Sql
  * @param array $array The $connections of the tables.
  * @return srtring List of tables separted by comma.
  */
-    protected function makingFrom($array)
+    protected function makingFrom($array = null)
     {
+        if ( !$array ) {
+            $array = self::getConnections();
+        }
         $tables = array();
         foreach($array as $key => $value){
             if ( !in_array(self::getTableNameFromData($key),$tables) ) {
@@ -140,18 +159,20 @@ class SqlAaom extends Sql
  * @return string The final WHERE part.
  * 
  */
-    public function makingWhere($conditions = null){
+    public function makingWhere($conditions = null, $connectTables = 1){
         if ( is_array($conditions) ) {
             foreach($conditions as $field => $value){
                 $c.= $this->_table . '.' . $field . ' = ' . $value . ' AND ';
             }
             $c = substr($c,0,strlen($c)-5);
         }
-        if ( self::makingConnections($this->getConnections()) ){
-            if ( $c ) {
-                $c.= ' AND ';
+        if ( $connectTables ) {
+            if ( self::makingConnections($this->getConnections()) ){
+                if ( $c ) {
+                    $c.= ' AND ';
+                }
+                $c.= self::makingConnections($this->getConnections());
             }
-            $c.= self::makingConnections($this->getConnections());
         }
         return $c;
     }
@@ -201,22 +222,35 @@ class SqlAaom extends Sql
         return substr($where,0,strlen($where)-5);    
     }
     
-    public function queryMaker($type, $conditions, $orderBy, $groupBy, $having, $limit)
+    public function setQuery($type, $conditions = null, $orderBy = null, $groupBy = null, $having = null, $limit = null)
     {
-        //TYPE
-        $type = upCase($type);
-        if ( $type == 'SELECT' ) {
-            $fields = self::makingFieldsList(self::describeTable(),$this->table);
-            $table   = self::makingFrom(self::getConnections());
-            if ( self::makingWhere($field,$value) ) {
-                $where = ' WHERE ' . self::makingWhere($conditions);
-            } else {
-                $where = '';
-            }
-            $data = compact('fields','table','where');      
-        } elseif ( $type = 'UPDATE') {
-            
+        $type = lowCase($type);
+        switch ($type){ 
+            case 'create':
+                $table = $this->_table;
+                $fields = self::makingFieldsList();
+                $values = $this->data;
+                $data = compact('table','fields','values');
+            break;
+            case 'read':
+                $fields = self::makingFieldsList();
+                $table   = self::makingFrom();
+                if ( self::makingWhere($field,$value) ) {
+                    $where = ' WHERE ' . self::makingWhere($conditions);
+                } else {
+                    $where = '';
+                }
+                $data = compact('fields','table','where');
+            break;
+            case 'update':
+            break;
+            case 'delete':
+                $table = $this->_table;
+                $where = ' WHERE ' . self::makingWhere($conditions, 0);
+                $data  = compact('table','where');
+            break;
         }
+
         $this->_query = self::renderSqlStatement($type, $data);
         return $this;
     }
@@ -243,10 +277,10 @@ class SqlAaom extends Sql
                 return 'INSERT INTO ' . $table . ' ' . $fields . ' VALUES (' . $values . ')'; 
             break;
             case 'UPDATE':
-                return 'UPDAE ' . $table . ' SET ' . $values . $where;
+                return 'UPDATE ' . $table . ' SET ' . $values . $where;
             break;
             case 'DELETE':
-                return 'DELETE FROM ' . $table . $where;
+                return 'DELETE FROM ' . $table . ' '. $where;
             break;
             default:
                 /**

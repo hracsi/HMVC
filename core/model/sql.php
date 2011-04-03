@@ -172,6 +172,11 @@ class Sql
         $this->_table = $table;
         return $this;
     }
+
+    public function test($a = '')
+    {
+        echo 'bent vagy';
+    }
 	
 /**
  * SQL::prepare()
@@ -179,8 +184,7 @@ class Sql
  * @param string $what if not all the data is required from the table
  * @return Object $this
  */
-     
-	public function prepare($what = "*")
+    public function prepare($what = "*")
 	{
 		$this->_query = "SELECT " . $what . " FROM `" . $this->_table ."`";
 		return $this;
@@ -213,7 +217,7 @@ class Sql
 	
 	public function orderBy($field, $type = 'ASC')
 	{
-		$this->_query = $this->_query . " ORDER BY `" . $field . "` " . $type;
+        $this->_query = $this->_query . " ORDER BY `" . $field . "` " . $type;
 		return $this;
 	}
 	
@@ -278,6 +282,19 @@ class Sql
         
         $this->_query = "DESCRIBE `" . $table . "`;";
         return $this;
+    }
+    
+/**
+ * Sql::saveDataBase()
+ * 
+ * Saving database into file.
+ * 
+ * @return void
+ */
+    public function saveDataBase(){
+        $backupFile = ROOT . DS . 'db' . DS . DB_NAME . date('-Y.m.d.') . '.sql';
+        $command = 'mysqldump --opt -h' . DB_HOST . ' -u' . DB_USER . ' -p' . DB_PASSWORD . ' ' . DB_NAME . ' > ' . $backupFile;
+        system($command);    
     }
     
     public function __destruct()

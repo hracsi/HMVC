@@ -22,7 +22,7 @@ define('CONFIG_LIB',ROOT . DS . 'config' . DS);
 
 define('CORE_LIB',ROOT . DS . 'core' . DS);
 
-define('CONTROLLERS_LIB',CORE_LIB . 'controller' . DS);
+define('CONTROLLERS_LIB',CORE_LIB . DS . 'controller' . DS);
 
 define('MODELS_LIB',CORE_LIB . 'model' . DS);
 
@@ -38,23 +38,22 @@ define('APP_VIEWS_LIB',APPLICATION_LIB . 'views' . DS);
 
 define('PUBLIC_LIB',ROOT . DS . 'public' . DS);
 
-define('IMG_LIB',PUBLIC_LIB . DS . 'img' . DS);
+define('IMG_LIB',PUBLIC_LIB . 'img' . DS);
 
-define('CSS_LIB',PUBLIC_LIB . DS . 'css' . DS);
+define('CSS_LIB',PUBLIC_LIB . 'css' . DS);
 
-define('JS_LIB',PUBLIC_LIB . DS . 'js' . DS);
+define('JS_LIB',PUBLIC_LIB . 'js' . DS);
 
 define('DB_STORE_LIB',ROOT . DS . 'db' . DS);
 
 define('TMP_LIB',ROOT . DS . 'tmp' . DS);
 
-define('CACHE_LIB',TMP_LIB . DS . 'cache' . DS);
+define('CACHE_LIB',TMP_LIB . 'cache' . DS);
 
-define('LOG_LIB',TMP_LIB . DS . 'logs' . DS);
+define('LOG_LIB',TMP_LIB . 'logs' . DS);
 
-define('SESSIONS_LIB',TMP_LIB . DS . 'sessions' . DS);
+define('SESSIONS_LIB',TMP_LIB . 'sessions' . DS);
 
 session_save_path(SESSIONS_LIB);
-
 
 ?>

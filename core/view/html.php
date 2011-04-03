@@ -51,8 +51,11 @@ class HTML
 		return '<meta http-equiv="' . $type . '" content="' . $content . '" />' . "\r\n";
 	}
 	
-	public function css($name)
+	public function css($name = 'all')
 	{
+        if ( $name == 'all' ) {
+            $name = self::getFiles(CSS_LIB, 'css');
+        }
         if ( is_array($name) ) {
             foreach($name as $css) {
                 $files = $files . '<link href="/public/css/' . $css . '" rel="stylesheet" type="text/css" />' . "\r\n";
@@ -63,14 +66,17 @@ class HTML
         }
 	}
     
-    public function js($name) {
+    public function js($name = 'all') {
+        if ( $name == 'all' ) {
+            $name = self::getFiles(JS_LIB, 'js');
+        }
         if ( is_array($name) ) {
             foreach($name as $js) {
                 $files = $files . '<script type="text/javascript" src="/public/js/' . $js . '.js"></script>' . "\r\n";
             }
             return $files;
         } else {
-            return '<script type="text/javascript" src="/public/js/ ' . $name . '.js"></script>' . "\r\n";
+            return '<script type="text/javascript" src="/public/js/' . $name . '"></script>' . "\r\n";
         }        
     }    
     
@@ -164,14 +170,13 @@ class HTML
     	return '<a href="'.$data.'" target = "_blank" >'.$data.'</a>'; 
     }
 
-    /**
-     * Transforming a text that you can put to an url
-     * 
-     * @example $text ex.: 'helló világ oldal' -> $text = 'hello_vilag_oldal'
-     * @param string $text That should be transformed.
-     * @return string That is transformed.
-     */
-    
+/**
+ * Transforming a text that you can put to an url.
+ * 
+ * @example $text ex.: 'helló világ oldal' -> $text = 'hello_vilag_oldal'
+ * @param string $text That should be transformed.
+ * @return string That is transformed.
+ */
     private function generatePrettyUrl($text){ 
          $text = mb_strtolower($text, 'UTF-8'); 
          $text = str_replace('ő', 'o', $text); 
@@ -192,6 +197,41 @@ class HTML
          return $text; 
     }
     
+    public function listdir($dir = CSS_LIB, $type)
+    { 
+        if (!is_dir($dir)) { 
+            return false; 
+        } 
+        
+        $files = array(); 
+        self::listdiraux($dir, $files, $type); 
+    
+        return $files; 
+    } 
+    
+    public function listdiraux($dir, &$files, $type) { 
+        $handle = opendir($dir); 
+        while (($file = readdir($handle)) !== false) { 
+            if ($file == '.' || $file == '..') { 
+                continue; 
+            } 
+            
+            $filepath = $dir == '.' ? $file : $dir . '/' . $file; 
+            if ( is_link($filepath) ) 
+                continue; 
+            if ( is_file($filepath) and strtolower(substr($file,-strlen($type))) == $type )
+                $files[] = $file; 
+            else if ( is_dir($filepath) ) 
+                self::listdiraux($filepath, $files, $type); 
+        }
+        closedir($handle); 
+    } 
+    
+    public function getFiles($dir, $type){
+        $files = self::listdir($dir, $type);
 
+        sort($files, SORT_LOCALE_STRING);
+       return $files;
+    }
 
 }

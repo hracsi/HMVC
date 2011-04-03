@@ -54,8 +54,8 @@ class View
     
 	public function callingTemplate()
 	{
-        $render = new Template;
-        $render->render($this->variables, $this->templates);
+        $template = new Template;
+        $template->render($this->variables, $this->templates);
 	}
     
     public function __destruct() 

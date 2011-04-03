@@ -17,14 +17,16 @@
 class Model extends SqlAaom
 {
     protected $_model;
-	
+    public $data, $fields, $key, $keyValue;
+    	
 	public function __construct($model = null)
 	{
-        $this->_model = Inflector::makeModelName(get_class($this));
-		$this->_table = Inflector::makeSqlTableName($this->_model);
-        $this->data   = '';
-        $this->fields = array();
-        $this->key    = '';
+        $this->_model   = Inflector::makeModelName(get_class($this));
+        $this->_table   = Inflector::makeSqlTableName($this->_model);
+        $this->data     = '';
+        $this->fields   = array();
+        $this->key      = '';
+        $this->keyValue = null;
 	}
     
     public function __call($func, $args)
@@ -53,6 +55,23 @@ class Model extends SqlAaom
         $select = self::makingFieldsList(self::describeTable(),$this->table);
         $from = self::makingFrom(self::getConnections());
         $where = self::maekingWhere($field,$value);
+    }
+    
+    public function create()
+    {
+        if ( !$this->key ) {
+            $this->key = $this->getTablePrimaryKeyName();
+        }
+        if ( $this->keyValue ) {
+            $rows = self::setQuery('create',array($this->key => $this->keyValue))->execute()->countRows();		
+            if ( $rows == 0 ) {
+               return 0;
+            }
+            return 1;
+        } else {
+            return 0;
+        }
+
     }
     
     /**
@@ -84,14 +103,36 @@ class Model extends SqlAaom
         $query = 'SELECT ' . $fields . 'FROM ' . $this->_table . ' WHERE ' . $condition . ' ' . $join . $groupBy . $orderBy . $having;
     }
     
+    public function update()
+    {
+
+    }
+    
+    public function delete()
+    {
+        if ( !$this->key ) {
+            $this->key = $this->getTablePrimaryKeyName();
+        }
+        if ( $this->keyValue ) {
+            $rows = self::setQuery('delete',array($this->key => $this->keyValue))->execute()->countRows();		
+            if ( $rows == 0 ) {
+               return 0;
+            }
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+    
     /**
      * @todo PUT IT OUT AFTER FINISHING THE TEST 
     **/
     public function test()
     {
         echo '<br />SELECT ' . $this->makingFieldsList($this->describeTable(),$this->_table) . '<br />';
-        echo 'FROM ' . $this->makingFrom($this->getConnections())  . '<br />';;
-        echo 'WHERE ' . $this->makingWhere(array('id' => 6));
+        echo 'FROM ' . $this->makingFrom($this->getConnections())  . '<br />';
+        echo 'WHERE ' . $this->makingWhere(array('id' => 6))  . '<br />';
+        echo 'kulcs: ' . $this->getTablePrimaryKeyName();
     }
 
 }

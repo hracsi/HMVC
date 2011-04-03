@@ -25,7 +25,7 @@ define(ROOT, dirname(dirname(__FILE__)));
 
 session_start();
 
-include_once ROOT . '/core/config.php';
 include_once ROOT . '/config/config.php';
+include_once ROOT . '/core/config.php';
 include_once ROOT . '/core/shared.php';
 include_once ROOT . '/core/core.php';

@@ -26,41 +26,36 @@ class Form extends HTML
         $form = '<form ';
         //setting the id
         if ( in_array('id', $options) ) {
-            $form = $form . 'id="' . $options ['id'] . '" ';
+            $form .= 'id="' . $options ['id'] . '" ';
         }
         //setting type
         if ( $options['type'] == 'file' ) {
-            $form = $form . 'enctype="multipart/form-data" ';
+            $form .= 'enctype="multipart/form-data" ';
         }
         //setting the method
         if ( in_array('method', $options) ) {
-            $form = $form . 'method="' . $options ['method'] . '" ';
+            $form .= 'method="' . $options ['method'] . '" ';
         } else {
-            $form = $form . 'method="post" ';
+            $form .= 'method="post" ';
         }
         //setting action
         if ( in_array('url', $options) ) {
             if ( is_array($options['url'] ) ) {
-                $form = $form . 'action="' . parent::url($options['url']) . '" ';
+                $form .= 'action="' . parent::url($options['url']) . '" ';
             } else {
-                $form = $form . 'action="' . $options['url'] . '" ';
+                $form .= 'action="' . $options['url'] . '" ';
             }
         } else {
-            $form = $form . 'action="' . $url . '" ';
+            $form .= 'action="' . $url . '" ';
         }
-        $form = $form . '>';
+        $form .= '>';
         return $form . "\r\n";
     }
     
     
-    public function end($value = null)
+    public function close()
     {
-        if ( $value ) {
-            
-        } else {
-            $form = '</form>';
-        }
-        return $form . "\r\n";
+        return '</form>' . "\r\n";
     }
 
     public function input($options)
